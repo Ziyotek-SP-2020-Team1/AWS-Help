@@ -22,4 +22,4 @@
 
 6. Now you need to install wget ( `yum install wget -y` ) and then you can use `code` command to open files from your terminal into VSCod, for that type ( `code test.txt` ) that should install vscode then create and then open test.txt file in VSCode.
 
-7. Now what is left to install AWS CLI, Python to install cfn-lint, and Ruby to install cfn-nag.
+7. Now `touch aws-setup.sh` and then give it execute permission `chmod +x aws-setup.sh` and run it with `source aws-setup.sh`, make sure you use source command and not bash. Now you are finished.

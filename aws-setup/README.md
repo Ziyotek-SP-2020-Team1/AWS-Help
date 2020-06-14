@@ -22,4 +22,12 @@
 
 6. Now you need to install wget ( `yum install wget -y` ) and then you can use `code` command to open files from your terminal into VSCod, for that type ( `code test.txt` ) that should install vscode then create and then open test.txt file in VSCode.
 
-7. Now `touch aws-setup.sh` and then give it execute permission `chmod +x aws-setup.sh` and run it with `source aws-setup.sh`, make sure you use source command and not bash. Now you are finished.
+7. Now use this command `touch aws-setup.sh` to create script file and then give it execute permission `chmod +x aws-setup.sh` and run it with `source aws-setup.sh`, make sure you use source command and not bash. Now you are finished.
+
+8. Now you need to install couple of vscode extensions to be able to use your cfn-lint and cfn-nag in real time in your vscode.These include:
+
+   - Cloudformation
+   - Cloudformation Linter
+   - cfn-nag Linter
+
+9. Now you are done you can create you cloudformation files then used command `code` to open them in vscode.

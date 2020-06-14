@@ -25,7 +25,7 @@
 7. Now use this command `touch aws-setup.sh` to create script file and then give it execute permission `chmod +x aws-setup.sh` and run it with `source aws-setup.sh`, make sure you use source command and not bash. Now you are finished.
 
 8. Now you need to install couple of vscode extensions to be able to use your cfn-lint and cfn-nag in real time in your vscode.These include:
-
+   - YAML
    - Cloudformation
    - Cloudformation Linter
    - cfn-nag Linter

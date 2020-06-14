@@ -18,11 +18,11 @@
 
 4. Launch your Windows Terminal Program and Click on the Downward Arrow right next to Plus icon and select CentOS7 and now you are inside CentOS terminal.
 
-5. type `cd` command to get to your root home directory
+5. Type `cd` command to get to your root home directory
 
 6. Now you need to install wget ( `yum install wget -y` ) and then you can use `code` command to open files from your terminal into VSCod, for that type ( `code test.txt` ) that should install vscode then create and then open test.txt file in VSCode.
 
-7. Now use this command `touch aws-setup.sh` to create script file and then give it execute permission `chmod +x aws-setup.sh` and run it with `source aws-setup.sh`, make sure you use source command and not bash. Now you are finished.
+7. Now use this command `touch aws-setup.sh` to create script file and then give it execute permission `chmod +x aws-setup.sh` and run it with `source aws-setup.sh`, make sure you use `source` command and not bash. At the end script will print out that script has finished its job and from there you are good to go.
 
 8. Now you need to install couple of vscode extensions to be able to use your cfn-lint and cfn-nag in real time in your vscode.These include:
    - YAML

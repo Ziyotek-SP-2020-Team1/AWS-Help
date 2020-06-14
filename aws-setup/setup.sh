@@ -31,3 +31,4 @@ source ~/.bashrc
 rbenv install 2.6.6
 rbenv global 2.6.6
 gem install cfn-nag
+echo -e "\nFinished Installation, you are good to go"

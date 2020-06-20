@@ -48,9 +48,9 @@ if [ $? -le 1 ]; then
             aws cloudformation describe-stack-events --query "StackEvents[0].[Timestamp,LogicalResourceId,ResourceStatus]" --stack-name $stackName --output text
             echo -e "\n\e[32m +---\e[39m Stack Name \e[32m$stackName\e[39m has FAILED to create, Please check for errors down below"
             echo -e "\n\e[32m +---\e[39m This LogicalId Resource that caused an error"
-            aws cloudformation describe-stack-events --query "StackEvents[?ResourceStatus =='CREATE_FAILED'].LogicalResourceId  " --stack-name testing --output yaml
+            aws cloudformation describe-stack-events --query "StackEvents[?ResourceStatus =='CREATE_FAILED'].LogicalResourceId  " --stack-name $stackName --output yaml
             echo -e "\n\e[32m +---\e[39m This is in detail describtion of an error"
-            aws cloudformation describe-stack-events --query "StackEvents[?ResourceStatus =='CREATE_FAILED'].ResourceStatusReason " --stack-name testing --output yaml
+            aws cloudformation describe-stack-events --query "StackEvents[?ResourceStatus =='CREATE_FAILED'].ResourceStatusReason " --stack-name $stackName --output yaml
             exit
              # When until loop finished, checks if stack status Failed or not, If so then echo's that is has failed and display's which LogicalId failed and what went wrong
 

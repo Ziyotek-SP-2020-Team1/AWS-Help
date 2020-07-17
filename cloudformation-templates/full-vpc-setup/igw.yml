@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Internet Gateway Template
+
+Parameters:
+  igwName:
+    Description: name of the internet Gateway
+    Type: String
+    Default: ""
+
+  VPCid:
+    Description: name of VPC to attach the internet gateway to
+    Type: String
+    Default: ""
+
+Resources:
+  internetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref igwName
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPCid
+      InternetGatewayId: !Ref internetGateway
+
+Outputs:
+  igwIDoutput:
+    Description: output the id of Internet Gateway
+    Value: !Ref internetGateway
+    Export:
+      Name: !Join
+        - ""
+        - - !Ref igwName
+          - -igwID

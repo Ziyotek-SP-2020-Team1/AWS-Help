@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Subnet Associate to Route Table Template
+
+Parameters:
+  rtName:
+    Description: Name of the Route Table
+    Type: String
+    Default: ""
+
+  subnetName:
+    Description: Name of the Route Table
+    Type: String
+    Default: ""
+
+Resources:
+  associateSubnetToRT:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId:
+        Fn::ImportValue: !Ref rtName
+      SubnetId:
+        Fn::ImportValue: !Ref subnetName

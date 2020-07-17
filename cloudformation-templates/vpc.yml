@@ -1,0 +1,277 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: VPC Template
+
+Parameters:
+  nameVPC:
+    Description: Name for my VPC
+    Type: String
+    Default: "Blue"
+
+  cidrVPC:
+    Description: VPC CIDR Block, Don't write net mask only ip
+    Type: String
+    Default: 10.0.0.0/16
+
+  subnet1:
+    Description: Input subnet NAME, subnet Availability Zone and it needs to be number (0 = us-east-1a, 1 = us-east-1b) subnet 3RD OCTET, subnet NUMBER OF CIDR GENERATED (Keep in mind AWS reserves 5 IP for its own use, so Input Amount - 5 = Available IP), subnet MASK (/32 - /INPUT = /DESIRED SUBNET MASK)
+    Type: CommaDelimitedList
+    Default: public-subnet-1, 0, 10, 256, 8
+
+  subnet2:
+    Description: Input subnet NAME, subnet Availability Zone and it needs to be number (0 = us-east-1a, 1 = us-east-1b) subnet 3RD OCTET, subnet NUMBER OF CIDR GENERATED (Keep in mind AWS reserves 5 IP for its own use, so Input Amount - 5 = Available IP), subnet MASK (/32 - /INPUT = /DESIRED SUBNET MASK)
+    Type: CommaDelimitedList
+    Default: public-subnet-2, 1, 20, 256, 8
+
+  subnet3:
+    Description: Input subnet NAME, subnet Availability Zone and it needs to be number (0 = us-east-1a, 1 = us-east-1b) subnet 3RD OCTET, subnet NUMBER OF CIDR GENERATED (Keep in mind AWS reserves 5 IP for its own use, so Input Amount - 5 = Available IP), subnet MASK (/32 - /INPUT = /DESIRED SUBNET MASK)
+    Type: CommaDelimitedList
+    Default: private-subnet-1, 0, 30, 256, 8
+
+  subnet4:
+    Description: Input subnet NAME, subnet Availability Zone and it needs to be number (0 = us-east-1a, 1 = us-east-1b) subnet 3RD OCTET, subnet NUMBER OF CIDR GENERATED (Keep in mind AWS reserves 5 IP for its own use, so Input Amount - 5 = Available IP), subnet MASK (/32 - /INPUT = /DESIRED SUBNET MASK)
+    Type: CommaDelimitedList
+    Default: private-subnet-2, 1, 40, 256, 8
+
+  routetable1:
+    Description: Route Table Naming
+    Type: String
+    Default: "public-routetable"
+
+  routetable2:
+    Description: Route Table Naming
+    Type: String
+    Default: "private-routetable"
+
+  securitygroup1:
+    Description: Security group Name
+    Type: String
+    Default: "webSG"
+
+  templateURL:
+    Description: URL of the cloudformation stacks in S3 Bucket
+    Type: String
+    Default: "https://cloudformation-templates-uzb.s3.us-east-2.amazonaws.com"
+
+Resources:
+  myVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref cidrVPC
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Ref nameVPC
+
+  PublicSubnet1:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        subnetName: !Select [0, !Ref subnet1]
+        VPCid: !Ref myVPC
+        subnetAZ:
+          Fn::Select:
+          - !Select [1, !Ref subnet1]
+          - !GetAZs
+            Ref: 'AWS::Region'
+        subnetCIDR: !Select [ !Select [2, !Ref subnet1], !Cidr [ !Ref "cidrVPC", !Select [3, !Ref subnet1], !Select [4, !Ref subnet1] ]]
+        subnetIPinstance: true
+      TemplateURL: !Join [ "/", [ !Ref templateURL, subnet.yml ]]
+      TimeoutInMinutes: 60
+
+  PublicSubnet2:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        subnetName: !Select [0, !Ref subnet2]
+        VPCid: !Ref myVPC
+        subnetAZ:
+          Fn::Select:
+          - !Select [1, !Ref subnet2]
+          - !GetAZs
+            Ref: 'AWS::Region'
+        subnetCIDR: !Select [ !Select [2, !Ref subnet2], !Cidr [ !Ref "cidrVPC", !Select [3, !Ref subnet2], !Select [4, !Ref subnet2] ]]
+        subnetIPinstance: true
+      TemplateURL: !Join [ "/", [ !Ref templateURL, subnet.yml ]]
+      TimeoutInMinutes: 60
+
+  PrivateSubnet1:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        subnetName: !Select [0, !Ref subnet3]
+        VPCid: !Ref myVPC
+        subnetAZ:
+          Fn::Select:
+          - !Select [1, !Ref subnet3]
+          - !GetAZs
+            Ref: 'AWS::Region'
+        subnetCIDR: !Select [ !Select [2, !Ref subnet3], !Cidr [ !Ref "cidrVPC", !Select [3, !Ref subnet3], !Select [4, !Ref subnet3] ]]
+        subnetIPinstance: true
+      TemplateURL: !Join [ "/", [ !Ref templateURL, subnet.yml ]]
+      TimeoutInMinutes: 60
+
+  PrivateSubnet2:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        subnetName: !Select [0, !Ref subnet4]
+        VPCid: !Ref myVPC
+        subnetAZ:
+          Fn::Select:
+          - !Select [1, !Ref subnet4]
+          - !GetAZs
+            Ref: 'AWS::Region'
+        subnetCIDR: !Select [ !Select [2, !Ref subnet4], !Cidr [ !Ref "cidrVPC", !Select [3, !Ref subnet4], !Select [4, !Ref subnet4] ]]
+        subnetIPinstance: true
+      TemplateURL: !Join [ "/", [ !Ref templateURL, subnet.yml ]]
+      TimeoutInMinutes: 60
+
+  internetGateway:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        igwName: IGW
+        VPCid: !Ref myVPC
+      TemplateURL: !Join [ "/", [ !Ref templateURL, igw.yml ]]
+      TimeoutInMinutes: 60
+
+  routeTablePublic:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: internetGateway
+    Properties:
+      Parameters:
+        routetableName: public-routetable
+        VPCid: !Ref myVPC
+        RTpublicORprivate: public
+      TemplateURL: !Join [ "/", [ !Ref templateURL, routetable.yml ]]
+      TimeoutInMinutes: 60
+
+  routeTablePrivate:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: internetGateway
+    Properties:
+      Parameters:
+        routetableName: private-routetable
+        VPCid: !Ref myVPC
+        RTpublicORprivate: private
+      TemplateURL: !Join [ "/", [ !Ref templateURL, routetable.yml ]]
+      TimeoutInMinutes: 60
+
+  subnet1AssociateToRT:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: routeTablePublic
+    Properties:
+      Parameters:
+        rtName: !Join ["", [!Ref routetable1, -rtID]]
+        subnetName: !Join ["", [!Select [0, !Ref subnet1], -SubnetID]]
+      TemplateURL: !Join [ "/", [ !Ref templateURL, subnetAssociate.yml ]]
+      TimeoutInMinutes: 60
+
+  subnet2AssociateToRT:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: routeTablePublic
+    Properties:
+      Parameters:
+        rtName: !Join ["", [!Ref routetable1, -rtID]]
+        subnetName: !Join ["", [!Select [0, !Ref subnet2], -SubnetID]]
+      TemplateURL: !Join [ "/", [ !Ref templateURL, subnetAssociate.yml ]]
+      TimeoutInMinutes: 60
+
+  subnet3AssociateToRT:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: routeTablePrivate
+    Properties:
+      Parameters:
+        rtName: !Join ["", [!Ref routetable2, -rtID]]
+        subnetName: !Join ["", [!Select [0, !Ref subnet3], -SubnetID]]
+      TemplateURL: !Join [ "/", [ !Ref templateURL, subnetAssociate.yml ]]
+      TimeoutInMinutes: 60
+
+  subnet4AssociateToRT:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: routeTablePrivate
+    Properties:
+      Parameters:
+        rtName: !Join ["", [!Ref routetable2, -rtID]]
+        subnetName: !Join ["", [!Select [0, !Ref subnet4], -SubnetID]]
+      TemplateURL: !Join [ "/", [ !Ref templateURL, subnetAssociate.yml ]]
+      TimeoutInMinutes: 60
+
+  sg1:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        typeOfSG: sg
+        sgName: !Ref securitygroup1
+        sgDesc: allow to ssh, connect through browser and allow rds
+        vpcID: !Ref myVPC
+        ipProtocol: tcp
+        fromPort: 22
+        toPort: 22
+        cidrIP: 0.0.0.0/0
+      TemplateURL: !Join [ "/", [ !Ref templateURL, sg.yml ]]
+      TimeoutInMinutes: 60
+
+  sg1IngressSSH:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: sg1
+    Properties:
+      Parameters:
+        typeOfSG: ingressOnly
+        sgName: !Ref securitygroup1
+        vpcID: !Ref myVPC
+        ipProtocol: tcp
+        fromPort: 22
+        toPort: 22
+        cidrIP: 0.0.0.0/0
+      TemplateURL: !Join [ "/", [ !Ref templateURL, sg.yml ]]
+      TimeoutInMinutes: 60
+
+  sg1IngressHTTP:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: sg1
+    Properties:
+      Parameters:
+        typeOfSG: ingressOnly
+        sgName: !Ref securitygroup1
+        vpcID: !Ref myVPC
+        ipProtocol: tcp
+        fromPort: 80
+        toPort: 80
+        cidrIP: 0.0.0.0/0
+      TemplateURL: !Join [ "/", [ !Ref templateURL, sg.yml ]]
+      TimeoutInMinutes: 60
+
+  sg1IngressRDS:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: sg1
+    Properties:
+      Parameters:
+        typeOfSG: ingressOnly
+        sgName: !Ref securitygroup1
+        vpcID: !Ref myVPC
+        ipProtocol: tcp
+        fromPort: 3306
+        toPort: 3306
+        cidrIP: 0.0.0.0/0
+      TemplateURL: !Join [ "/", [ !Ref templateURL, sg.yml ]]
+      TimeoutInMinutes: 60
+
+  sgAllowAll:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        typeOfSG: allowAll
+        sgName: allowAllSG
+        sgDesc: allow connection from all ports and ip addresses
+        vpcID: !Ref myVPC
+      TemplateURL: !Join [ "/", [ !Ref templateURL, sg.yml ]]
+      TimeoutInMinutes: 60
+
+Outputs:
+  cidrVPCoutput:
+    Description: Output the CIDR Block of my VPC
+    Value: !GetAtt myVPC.CidrBlock
+    Export:
+      Name: VPC-CIDR-Block

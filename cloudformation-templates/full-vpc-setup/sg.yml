@@ -1,0 +1,111 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Security Group Template
+
+Parameters:
+  typeOfSG:
+    Description: Get the information if to create sg or ingress rule 
+    Type: String 
+    Default: "sg"
+    AllowedValues:
+      - sg
+      - ingressOnly
+      - allowAll
+
+  sgName:
+    Description: Name of the Group
+    Type: String
+    Default: ""
+
+  sgDesc:
+    Description: Description of the Security Group
+    Type: String
+    Default: ""
+
+  vpcID:
+    Description: VPC ID
+    Type: String
+    Default: ""
+
+  ipProtocol:
+    Description: Select which type of ip protocol to use
+    Type: String
+    Default: "tcp"
+    AllowedValues:
+      - tcp
+      - udp
+
+  fromPort:
+    Description: Select which port to allow
+    Type: String
+    Default: ""
+
+  toPort:
+    Description: Select which port to allow
+    Type: String
+    Default: ""
+
+  cidrIP:
+    Description: Select which ips to allow
+    Type: String
+    Default: ""
+
+Conditions:
+  createSG: !Equals [ !Ref typeOfSG, sg]
+  createIngressOnly: !Equals [ !Ref typeOfSG, ingressOnly]
+  createAllowAllSG: !Equals [ !Ref typeOfSG, allowAll]
+
+Resources: 
+  securityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: createSG
+    Properties:
+      GroupName: !Ref sgName
+      GroupDescription: !Ref sgDesc
+      VpcId: !Ref vpcID
+  
+  sgIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Condition: createSG
+    Properties:
+      GroupId: !Ref securityGroup
+      IpProtocol: !Ref ipProtocol
+      FromPort: !Ref fromPort
+      ToPort: !Ref toPort
+      CidrIp: !Ref cidrIP
+
+  sgIngressOnly:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Condition: createIngressOnly
+    Properties:
+      GroupId:
+        Fn::ImportValue: !Join [ "",[!Ref sgName, "-sgID"]]
+      IpProtocol: !Ref ipProtocol
+      FromPort: !Ref fromPort
+      ToPort: !Ref toPort
+      CidrIp: !Ref cidrIP
+
+  sgAllowAll:
+    Type: AWS::EC2::SecurityGroup
+    Condition: createAllowAllSG
+    Properties:
+      GroupName: !Ref sgName
+      GroupDescription: !Ref sgDesc
+      VpcId: !Ref vpcID
+      SecurityGroupIngress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  sgIDoutput:
+    Description: Output the Security Group ID 
+    Condition: createSG
+    Value: !GetAtt securityGroup.GroupId
+    Export: 
+      Name: !Join [ "", [ !Ref sgName, "-sgID"]]
+
+  sgIDAllowAlloutput:
+    Description: Output the Security Group ID 
+    Condition: createAllowAllSG
+    Value: !GetAtt sgAllowAll.GroupId
+    Export: 
+      Name: !Join [ "", [ !Ref sgName, "-sgID"]]

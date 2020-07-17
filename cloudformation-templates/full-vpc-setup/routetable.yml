@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Internet Gateway Template
+
+Parameters:
+  routetableName:
+    Description: name of route table
+    Type: String
+    Default: ""
+
+  VPCid:
+    Description: VPC ID to attach route table
+    Type: String
+    Default: ""
+
+  RTpublicORprivate:
+    Description: Select between public route table or private one
+    Type: String
+    Default: private
+    AllowedValues:
+      - private
+      - public
+
+Conditions:
+  createPublicRT: !Equals [!Ref RTpublicORprivate, public]
+
+Resources:
+  routeTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCid
+      Tags:
+        - Key: Name
+          Value: !Ref routetableName
+
+  routeToIGW:
+    Type: AWS::EC2::Route
+    Condition: createPublicRT
+    Properties:
+      RouteTableId: !Ref routeTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !ImportValue IGW-igwID
+
+Outputs:
+  rtIDoutput:
+    Description: id of Route Table
+    Value: !Ref routeTable
+    Export:
+      Name: !Join [ "", [!Ref routetableName,"-rtID"]]

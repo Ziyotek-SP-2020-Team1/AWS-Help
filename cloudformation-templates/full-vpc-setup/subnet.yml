@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Subnet Template
+
+Parameters:
+  subnetName:
+    Description: Name for our Subnet
+    Type: String
+    Default: ""
+
+  subnetAZ:
+    Description: Availability Zone in which Subnet will be in
+    Type: String
+    Default: ""
+
+  subnetCIDR:
+    Description: CIDR Block for Subnet
+    Type: String
+    Default: ""
+
+  subnetIPinstance:
+    Description: Weather to map IP for instance on launch by default
+    Type: String
+    Default: false
+    AllowedValues:
+      - false
+      - true
+
+  VPCid:
+    Description: Reference the VPC
+    Type: String
+    Default: ""
+
+Resources:
+  subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref subnetAZ
+      VpcId: !Ref VPCid
+      CidrBlock: !Ref subnetCIDR
+      MapPublicIpOnLaunch: !Ref subnetIPinstance
+      Tags:
+        - Key: Name
+          Value: !Ref subnetName
+
+Outputs:
+  subnetIDoutput:
+    Description: id of the subnet
+    Value: !Ref subnet
+    Export:
+      Name: !Join
+        - ""
+        - - !Ref subnetName
+          - -SubnetID

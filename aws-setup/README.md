@@ -30,4 +30,4 @@
    - Cloudformation Linter
    - cfn-nag Linter
 
-9. Now you are done you can create you cloudformation files then used command `code` to open them in vscode.
+9. Now you are done you can create you cloudformation files then use command `code` to open your files in vscode.
